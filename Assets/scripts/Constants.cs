@@ -7,4 +7,7 @@ public class Constants {
 
 	// Маска слоя земли.
 	public const int FLOOR_LAYER = 1 << 9;
+
+	// Допустимая погрешнеость. Используется для остановки движения.
+	public const float Epsilon = 0.1f;
 }

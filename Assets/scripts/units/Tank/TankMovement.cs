@@ -1,87 +1,101 @@
 ﻿using UnityEngine;
+using Progress;
 
+/// <summary>
+/// Специфичные для танка вещи - 
+/// движение и вращение клавишами курсора, звук мотора.
+/// </summary>
 public class TankMovement : MonoBehaviour {
-    public float speed = 12f;                 // How fast the tank moves forward and back.
-    public float turnSpeed = 180f;            // How fast the tank turns in degrees per second.
-    public AudioSource m_MovementAudio;         // Reference to the audio source used to play engine sounds. NB: different to the shooting audio source.
-    public AudioClip m_EngineIdling;            // Audio to play when the tank isn't moving.
-    public AudioClip m_EngineDriving;           // Audio to play when the tank is moving.
-    public float m_PitchRange = 0.2f;           // The amount by which the pitch of the engine noises can vary.
+	// Скорость танка.
+	public float speed;
+	// Скорость вращения танка.
+	public float turnSpeed = 180f;
 
-    private string movementAxis;          // The name of the input axis for moving forward and back.
-    private string turnAxis;              // The name of the input axis for turning.
-    private Rigidbody m_Rigidbody;              // Reference used to move the tank.
-    private float m_MovementInputValue;         // The current value of the movement input.
-    private float m_TurnInputValue;             // The current value of the turn input.
-    private float originalPitch;              // The pitch of the audio source at the start of the scene.
+	// Аудио настройки.
+	public AudioSource m_MovementAudio;
+	public AudioClip m_EngineIdling;
+	public AudioClip m_EngineDriving;
+	public float m_PitchRange = 0.2f;
+	private float originalPitch;
 
+	// Ось движения.
+	private string movementAxis;
+	// Ось поворота.
+	private string turnAxis;
+	private Rigidbody m_Rigidbody;
+	private float movementInputValue;
+	private float turnInputValue;
 
-    private void Awake () {
-        m_Rigidbody = GetComponent<Rigidbody> ();
-    }
+	// Ссылка на юнит.
+	private Unit ownerUnit;
 
+	private void Awake() {
+		m_Rigidbody = GetComponent<Rigidbody>();
+		ownerUnit = GetComponent<Unit>();
+		speed = ownerUnit.Settings.Speed;
+	}
 
-    private void OnEnable () {
-        // When the tank is turned on, make sure it's not kinematic.
-        m_Rigidbody.isKinematic = false;
+	private void OnEnable() {
+		m_Rigidbody.isKinematic = false;
+		movementInputValue = 0f;
+		turnInputValue = 0f;
+	}
 
-        // Also reset the input values.
-        m_MovementInputValue = 0f;
-        m_TurnInputValue = 0f;
-    }
+	private void OnDisable() {
+		m_Rigidbody.isKinematic = true;
+	}
 
+	private void Start() {
+		movementAxis = "Vertical";
+		turnAxis = "Horizontal";
 
-    private void OnDisable () {
-        // When the tank is turned off, set it to kinematic so it stops moving.
-        m_Rigidbody.isKinematic = true;
-    }
+		originalPitch = m_MovementAudio.pitch;
+	}
 
+	private void Update() {
+		movementInputValue = Input.GetAxis(movementAxis);
+		turnInputValue = Input.GetAxis(turnAxis);
 
-    private void Start () {
-        movementAxis = "Vertical";
-        turnAxis = "Horizontal";
+		EngineAudio();
+	}
 
-        originalPitch = m_MovementAudio.pitch;
-    }
+	/// <summary>
+	/// Звук мотора в движении и в простое.
+	/// </summary>
+	private void EngineAudio() {
+		if (Mathf.Abs(movementInputValue) < Constants.Epsilon && Mathf.Abs(turnInputValue) < Constants.Epsilon) {
+			if (m_MovementAudio.clip == m_EngineDriving) {
+				m_MovementAudio.clip = m_EngineIdling;
+				m_MovementAudio.pitch = Random.Range(originalPitch - m_PitchRange, originalPitch + m_PitchRange);
+				m_MovementAudio.Play();
+			}
+		} else if (m_MovementAudio.clip == m_EngineIdling) {
+			m_MovementAudio.clip = m_EngineDriving;
+			m_MovementAudio.pitch = Random.Range(originalPitch - m_PitchRange, originalPitch + m_PitchRange);
+			m_MovementAudio.Play();
+		}
+	}
 
+	private void FixedUpdate() {
+		Move();
+		Turn();
+	}
 
-    private void Update () {
-        m_MovementInputValue = Input.GetAxis (movementAxis);
-        m_TurnInputValue = Input.GetAxis (turnAxis);
+	/// <summary>
+	/// Движение танка.
+	/// </summary>
+	private void Move() {
+		var movement = transform.forward * movementInputValue * speed * Time.deltaTime;
+		print(movement);
+		m_Rigidbody.MovePosition(m_Rigidbody.position + movement);
+	}
 
-        EngineAudio ();
-    }
-
-
-    private void EngineAudio () {
-        if (Mathf.Abs(m_MovementInputValue) < 0.1f && Mathf.Abs(m_TurnInputValue) < 0.1f) {
-            if (m_MovementAudio.clip == m_EngineDriving) {
-                m_MovementAudio.clip = m_EngineIdling;
-                m_MovementAudio.pitch = Random.Range(originalPitch - m_PitchRange, originalPitch + m_PitchRange);
-                m_MovementAudio.Play();
-            }
-        } else if (m_MovementAudio.clip == m_EngineIdling) {
-            m_MovementAudio.clip = m_EngineDriving;
-            m_MovementAudio.pitch = Random.Range(originalPitch - m_PitchRange, originalPitch + m_PitchRange);
-            m_MovementAudio.Play();
-        }
-    }
-
-    private void FixedUpdate () {
-        Move ();
-        Turn ();
-    }
-
-    private void Move () {
-        var movement = transform.forward * m_MovementInputValue * speed * Time.deltaTime;
-        m_Rigidbody.MovePosition(m_Rigidbody.position + movement);
-    }
-
-    private void Turn () {
-        var turn = m_TurnInputValue * turnSpeed * Time.deltaTime;
-        // Make this into a rotation in the y axis.
-        var turnRotation = Quaternion.Euler (0f, turn, 0f);
-        // Apply this rotation to the rigidbody's rotation.
-        m_Rigidbody.MoveRotation (m_Rigidbody.rotation * turnRotation);
-    }
+	/// <summary>
+	/// Вращение танка.
+	/// </summary>
+	private void Turn() {
+		var turn = turnInputValue * turnSpeed * Time.deltaTime;
+		var turnRotation = Quaternion.Euler(0f, turn, 0f);
+		m_Rigidbody.MoveRotation(m_Rigidbody.rotation * turnRotation);
+	}
 }

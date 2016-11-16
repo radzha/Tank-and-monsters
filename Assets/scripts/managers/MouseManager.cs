@@ -19,7 +19,7 @@ public class MouseManager : Singleton<MouseManager> {
 	public GameObject CameraSwitchUI;
 	// UI абилки ледяной стрелы.
 	public GameObject IceArrowClickUI;
-	// UI абилки метеоритного дождя. 
+	// UI абилки метеоритного дождя.
 	public GameObject MeteoRainClickUI;
 	// UI апгрейда казармы.
 	public GameObject SpawnerUpgradeClickUI;
@@ -75,25 +75,25 @@ public class MouseManager : Singleton<MouseManager> {
 
 		// Режим абилок.
 		switch (player.attackMode) {
-		case MainCharacter.AttackMode.IceArrow:
-			if (hit.collider != null) {
-				// Клик по юниту или зданию
-				var clicked = hit.collider.gameObject;
-				var damagable = clicked.GetComponent<Damagable>();
-				if (damagable != null) {
-					var isUnit = damagable is Unit;
-					if (!(isUnit && !(damagable as Unit).IsEnemy)) {
-						player.target.SetTarget(damagable, isUnit);
-						player.PositionTargetMode = false;
+			case MainCharacter.AttackMode.IceArrow:
+				if (hit.collider != null) {
+					// Клик по юниту или зданию
+					var clicked = hit.collider.gameObject;
+					var damagable = clicked.GetComponent<Damagable>();
+					if (damagable != null) {
+						var isUnit = damagable is Unit;
+						if (!(isUnit && !(damagable as Unit).IsEnemy)) {
+							player.target.SetTarget(damagable, isUnit);
+							player.PositionTargetMode = false;
+						}
 					}
 				}
-			}
-			break;
-		case MainCharacter.AttackMode.MeteoRain:
-			player.Attack();
-			break;
-		default:
-			throw new ArgumentOutOfRangeException();
+				break;
+			case MainCharacter.AttackMode.MeteoRain:
+				player.Attack();
+				break;
+			default:
+				throw new ArgumentOutOfRangeException();
 		}
 	}
 
@@ -146,7 +146,7 @@ public class MouseManager : Singleton<MouseManager> {
 		}
 		Physics.Raycast(ray, out hit, Mathf.Infinity, Constants.FLOOR_LAYER);
 		hit.point = new Vector3(hit.point.x, 0.1f, hit.point.z);
-		
+
 		// Если еще не выделяли создать плоскость.
 		if (clickedPoint == Vector3.zero) {
 			clickedPoint = hit.point;
