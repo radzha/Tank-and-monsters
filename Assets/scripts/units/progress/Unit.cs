@@ -413,7 +413,7 @@ namespace Progress {
 		/// Срабатывание орудия юнита.
 		/// </summary>
 		protected virtual void Fire() {
-			animator.SetTrigger("fire");
+			//animator.SetTrigger("fire");
 		}
 
 		/// <summary>
