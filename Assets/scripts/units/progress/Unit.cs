@@ -76,7 +76,7 @@ namespace Progress {
 		protected float attackSpeed;
 
 		// Основной цвет юнита.
-		private Color unitColor;
+		private Color unitColor = Color.black;
 		// Выделен ли юнит мышью.
 		private bool selected;
 
@@ -165,6 +165,11 @@ namespace Progress {
 			// Подписка на конец игры.
 			Divan.Instance.OnGameEnd -= OnGameEnd;
 			Divan.Instance.OnGameEnd += OnGameEnd;
+
+			// Начальный цвет юнита.
+			if (IsEnemy) {
+				FreezeVisually(false);
+			}
 		}
 
 		/// <summary>
@@ -192,9 +197,11 @@ namespace Progress {
 		/// Анимация радости выигравшей стороны.
 		/// </summary>
 		private void Hurray() {
-			animator.applyRootMotion = false;
-			animator.ResetTrigger("fire");
-			animator.SetTrigger("hurray");
+			if (animator != null) {
+				animator.applyRootMotion = false;
+				animator.ResetTrigger("fire");
+				animator.SetTrigger("hurray");
+			}
 		}
 
 		/// <summary>
@@ -250,6 +257,7 @@ namespace Progress {
 		/// </summary>
 		public void OnDie() {
 			SetSelected(false);
+			SpawnersManager.Instance.RemoveUnit(this);
 			if (SpawnersManager.Instance.IsLastWave && SpawnersManager.Instance.EnemiesCount() == 0) {
 				Divan.Instance.OnGameEnd(true);
 				Divan.gameStop = true;
@@ -257,7 +265,6 @@ namespace Progress {
 				Divan.Instance.OnGameEnd(false);
 				Divan.gameStop = true;
 			}
-			SpawnersManager.Instance.RemoveUnit(this);
 		}
 
 		/// <summary>
@@ -287,6 +294,9 @@ namespace Progress {
 		/// <param name="duration"></param>
 		/// <returns></returns>
 		public Profit TakeDamage(Unit unit, float damage, float slow, float attackSlow, float duration) {
+			if (IsDead()) {
+				return new Profit(0, 0, 0);
+			}
 			Speed *= 1 - slow;
 			attackSpeed *= 1 - attackSlow;
 			FreezeVisually(true);
@@ -305,7 +315,9 @@ namespace Progress {
 				unitColor = material.GetColor("_EmissionColor");
 				color = Color.white;
 			}
-			material.SetColor("_EmissionColor", color);
+			if (color != Color.black) {
+				material.SetColor("_EmissionColor", color);
+			}
 		}
 
 		/// <summary>

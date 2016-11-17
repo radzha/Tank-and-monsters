@@ -185,7 +185,6 @@ public class SpawnersManager : Singleton<SpawnersManager> {
 		Units.Remove(unit);
 		unit.gameObject.SetActive(false);
 		unitsPool.Add(unit.gameObject);
-		print(unitsPool.Count);
 	}
 
 	/// <summary>
@@ -207,7 +206,6 @@ public class SpawnersManager : Singleton<SpawnersManager> {
 			unitsPool.Remove(unit);
 			unit.transform.position = spawnPoint;
 			unit.GetComponent<Unit>().SetUnit();
-			print(unit.GetComponent<Unit>().Health());
 			unit.SetActive(true);
 			return unit;
 		}
