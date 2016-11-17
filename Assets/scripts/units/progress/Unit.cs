@@ -148,6 +148,11 @@ namespace Progress {
 		}
 
 		protected virtual void Awake() {
+			SetUnit();
+		}
+
+		public void SetUnit(){
+			isDead = false;
 			SettingsRead();
 			// Начальная цель - здание.
 			target = new Target(IsPlayer ? null : IsEnemy ? Divan.Instance as Damagable : Fountain.Instance as Damagable, false);
@@ -244,7 +249,6 @@ namespace Progress {
 		/// Похоронные процедуры.
 		/// </summary>
 		public void OnDie() {
-			SpawnersManager.Instance.Units.Remove(this);
 			SetSelected(false);
 			if (SpawnersManager.Instance.IsLastWave && SpawnersManager.Instance.EnemiesCount() == 0) {
 				Divan.Instance.OnGameEnd(true);
@@ -253,7 +257,7 @@ namespace Progress {
 				Divan.Instance.OnGameEnd(false);
 				Divan.gameStop = true;
 			}
-			Destroy(gameObject);
+			SpawnersManager.Instance.RemoveUnit(this);
 		}
 
 		/// <summary>

@@ -109,8 +109,7 @@ public class Spawner : MonoBehaviour, Selectable {
 		// случайный разброс 
 		var spawnPoint = new Vector3(transform.position.x + rand, 0f, transform.position.z + rand);
 		// рождение юнита в случайном месте споунера
-		var prefab = SpawnersManager.Instance.UnitPrefabs.First(u => u.isEnemy == isEnemy && u.type == type).prefab;
-		var unit = (GameObject)Instantiate(prefab, spawnPoint, Quaternion.identity);
+		var unit = SpawnersManager.Instance.GetNewUnit(isEnemy, type, spawnPoint);
 		var unitComp = unit.GetComponent<Unit>();
 		unitComp.Level = Level;
 		unit.transform.position = new Vector3(unit.transform.position.x, unit.transform.localScale.y, unit.transform.position.z);

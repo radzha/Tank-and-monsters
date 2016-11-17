@@ -36,7 +36,9 @@ public class SpawnersManager : Singleton<SpawnersManager> {
 
 	// Если выделен юнит.
 	public delegate void OnUnitSelected(Selectable thing);
-	public OnUnitSelected onUnitSelected = delegate { };
+
+	public OnUnitSelected onUnitSelected = delegate {
+	};
 
 	// Текущая волна атаки.
 	private int currentWave;
@@ -44,6 +46,9 @@ public class SpawnersManager : Singleton<SpawnersManager> {
 	private float delayTimer;
 	// Таймер продолжительности волн.
 	private float waveTimer = -1f;
+
+	// Пул свободных юнитов.
+	private HashSet<GameObject> unitsPool = new HashSet<GameObject>();
 
 	/// <summary>
 	/// Является ли волна атаки последней.
@@ -56,7 +61,8 @@ public class SpawnersManager : Singleton<SpawnersManager> {
 
 	// Произведенные юниты.
 	public HashSet<Unit> Units {
-		get; private set;
+		get;
+		private set;
 	}
 
 	// Возвращает все выделенные юниты.
@@ -168,6 +174,42 @@ public class SpawnersManager : Singleton<SpawnersManager> {
 	public void Select(Selectable thing) {
 		foreach (var t in AllSelectable) {
 			t.SetSelected(t.Equals(thing));
+		}
+	}
+
+	/// <summary>
+	/// Удалить юнит из числа активных и добавить его в пул.
+	/// </summary>
+	/// <param name="unit">Unit.</param>
+	public void RemoveUnit(Unit unit) {
+		Units.Remove(unit);
+		unit.gameObject.SetActive(false);
+		unitsPool.Add(unit.gameObject);
+		print(unitsPool.Count);
+	}
+
+	/// <summary>
+	/// Возвращает новый экземпляр юнита.
+	/// Если пул не пуст берёт из пула.
+	/// </summary>
+	/// <returns>The new unit.</returns>
+	/// <param name="isEnemy">If set to <c>true</c> is enemy.</param>
+	/// <param name="type">Type.</param>
+	/// <param name="spawnPoint">Spawn point.</param>
+	public GameObject GetNewUnit(bool isEnemy, Settings.Unit.UnitType type, Vector3 spawnPoint) {
+		if (unitsPool.Count == 0) {
+			var prefab = SpawnersManager.Instance.UnitPrefabs
+				.First(u => u.isEnemy == isEnemy && u.type == type)
+				.prefab;
+			return (GameObject)Instantiate(prefab, spawnPoint, Quaternion.identity);
+		} else {
+			var unit = unitsPool.First();
+			unitsPool.Remove(unit);
+			unit.transform.position = spawnPoint;
+			unit.GetComponent<Unit>().SetUnit();
+			print(unit.GetComponent<Unit>().Health());
+			unit.SetActive(true);
+			return unit;
 		}
 	}
 }
