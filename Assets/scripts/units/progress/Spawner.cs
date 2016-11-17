@@ -15,6 +15,8 @@ public class Spawner : MonoBehaviour, Selectable {
 	public bool isEnemy = false;
 	// Настройки.
 	public Settings.Spawner settings;
+	// Радиус, определяющий круг, в котором запрещён спаун.
+	public float radius;
 
 	// Веса, определяющие шансы производства того или иного типа юнита.
 	private Dictionary<Settings.Unit.UnitType, float> typeChances;
@@ -102,7 +104,8 @@ public class Spawner : MonoBehaviour, Selectable {
 	/// </summary>
 	private void MakeUnit() {
 		var type = RandomType();
-		var rand = Random.Range(-length, length);
+		var rand = Random.Range(radius, length);
+		rand *= Mathf.Sign(Random.Range(-1f, 1f));
 		// случайный разброс 
 		var spawnPoint = new Vector3(transform.position.x + rand, 0f, transform.position.z + rand);
 		// рождение юнита в случайном месте споунера
@@ -187,20 +190,20 @@ public class Spawner : MonoBehaviour, Selectable {
 	public string PrettyType() {
 		var type = "";
 		switch (spawnUnitTypes[0]) {
-		case Settings.Unit.UnitType.Archer:
-			type = "стрелков";
-			break;
-		case Settings.Unit.UnitType.Warrior:
-			type = "воинов";
-			break;
-		case Settings.Unit.UnitType.Boss:
-			type = "босса";
-			break;
-		case Settings.Unit.UnitType.Player:
-			type = "героя";
-			break;
-		default:
-			throw new System.ArgumentOutOfRangeException();
+			case Settings.Unit.UnitType.Archer:
+				type = "стрелков";
+				break;
+			case Settings.Unit.UnitType.Warrior:
+				type = "воинов";
+				break;
+			case Settings.Unit.UnitType.Boss:
+				type = "босса";
+				break;
+			case Settings.Unit.UnitType.Player:
+				type = "героя";
+				break;
+			default:
+				throw new System.ArgumentOutOfRangeException();
 		}
 		return "Казарма " + type;
 	}

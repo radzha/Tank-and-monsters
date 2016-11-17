@@ -17,40 +17,29 @@ public class ShellExplosion : MonoBehaviour {
 	public float m_ExplosionRadius = 5f;
 	// The maximum distance away from the explosion tanks can be and are still affected.
 
-	private Unit ownerUnit;
+	public Unit OwnerUnit{ get; set; }
 
 	private void Start() {
-//		ownerUnit = 
 		Destroy(gameObject, m_MaxLifeTime);
 	}
 
-
 	private void OnTriggerEnter(Collider other) {
-		// Collect all the colliders in a sphere from the shell's current position to a radius of the explosion radius.
-		var colliders = Physics.OverlapSphere(transform.position, m_ExplosionRadius, m_TankMask);
-
-		// Go through all the colliders...
-		for (var i = 0; i < colliders.Length; i++) {
-			// ... and find their rigidbody.
-			Rigidbody targetRigidbody = colliders[i].GetComponent<Rigidbody>();
-
-			// If they don't have a rigidbody, go on to the next collider.
-			if (!targetRigidbody)
-				continue;
-
-			// Add an explosion force.
-			targetRigidbody.AddExplosionForce(m_ExplosionForce, transform.position, m_ExplosionRadius);
-
-			// Find the TankHealth script associated with the rigidbody.
-			var unit = targetRigidbody.GetComponent<Progress.Unit>();
-
-			if (!unit) {
-				continue;
-			}
-
-//			float damage = CalculateDamage(targetRigidbody.position);
-//			unit.TakeDamage(damage);
+		if (!other.gameObject.CompareTag("Unit")) {
+			return;
 		}
+
+		Rigidbody targetRigidbody = other.GetComponent<Rigidbody>();
+		if (!targetRigidbody) {
+			return;
+		}
+
+		// Add an explosion force.
+		targetRigidbody.AddExplosionForce(m_ExplosionForce, transform.position, m_ExplosionRadius);
+
+		var unit = targetRigidbody.GetComponent<Progress.Unit>();
+
+		float damage = OwnerUnit.Settings.Attack;
+		unit.TakeDamage(OwnerUnit, damage);
 
 		// Unparent the particles from the shell.
 		m_ExplosionParticles.transform.parent = null;

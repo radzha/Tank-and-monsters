@@ -86,7 +86,6 @@ public class TankMovement : MonoBehaviour {
 	/// </summary>
 	private void Move() {
 		var movement = transform.forward * movementInputValue * speed * Time.deltaTime;
-		print(movement);
 		m_Rigidbody.MovePosition(m_Rigidbody.position + movement);
 	}
 

@@ -84,7 +84,8 @@ namespace Progress {
 		/// Скорость юнита.
 		/// </summary>
 		public float Speed {
-			get; set;
+			get;
+			set;
 		}
 
 		// Набор настроек юнита.
@@ -247,6 +248,9 @@ namespace Progress {
 			SetSelected(false);
 			if (SpawnersManager.Instance.IsLastWave && SpawnersManager.Instance.EnemiesCount() == 0) {
 				Divan.Instance.OnGameEnd(true);
+				Divan.gameStop = true;
+			} else if (!IsEnemy) {
+				Divan.Instance.OnGameEnd(false);
 				Divan.gameStop = true;
 			}
 			Destroy(gameObject);
@@ -523,18 +527,18 @@ namespace Progress {
 		public string PrettyType() {
 			var type = "";
 			switch (unitType) {
-			case global::Settings.Unit.UnitType.Archer:
-				type = "стрелок";
-				break;
-			case global::Settings.Unit.UnitType.Warrior:
-				type = "воин";
-				break;
-			case global::Settings.Unit.UnitType.Boss:
-				type = "босс";
-				break;
-			case global::Settings.Unit.UnitType.Player:
-				type = "герой";
-				break;
+				case global::Settings.Unit.UnitType.Archer:
+					type = "стрелок";
+					break;
+				case global::Settings.Unit.UnitType.Warrior:
+					type = "воин";
+					break;
+				case global::Settings.Unit.UnitType.Boss:
+					type = "босс";
+					break;
+				case global::Settings.Unit.UnitType.Player:
+					type = "герой";
+					break;
 			}
 			var own = IsEnemy ? "Вражеский" : "Наш";
 			return own + " " + type;
