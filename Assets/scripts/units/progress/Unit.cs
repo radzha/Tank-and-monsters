@@ -151,7 +151,7 @@ namespace Progress {
 			SetUnit();
 		}
 
-		public void SetUnit(){
+		public void SetUnit() {
 			isDead = false;
 			SettingsRead();
 			// Начальная цель - здание.
@@ -421,7 +421,9 @@ namespace Progress {
 		/// Срабатывание орудия юнита.
 		/// </summary>
 		protected virtual void Fire() {
-			//animator.SetTrigger("fire");
+			if (IsEnemy) {
+				animator.SetTrigger("fire");
+			}
 		}
 
 		/// <summary>
